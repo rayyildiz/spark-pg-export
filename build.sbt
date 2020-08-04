@@ -14,5 +14,5 @@ val sparkVersion = "3.0.0"
 
 libraryDependencies ++= Seq(
   "org.postgresql"    % "postgresql" % "42.2.14",
-  "org.apache.spark" %% "spark-sql"  % sparkVersion
+  "org.apache.spark" %% "spark-sql"  % sparkVersion % Provided
 )
