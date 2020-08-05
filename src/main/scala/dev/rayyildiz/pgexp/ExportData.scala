@@ -1,22 +1,27 @@
 package dev.rayyildiz.pgexp
 
-object ExportData extends App with SparkSupport with DatabaseSupport {
+import org.apache.spark.sql.SparkSession
 
-  val dataDF = spark.read
+object ExportData extends App with SparkSupport with DatabaseSupport {
+  private val session: SparkSession = spark(azAccountName, azAccountKey)
+
+  val dataDF = session.read
     .format("jdbc")
     .option("url", s"jdbc:postgresql://$dbUrl:$dbPort/$dbName?user=$dbUsername&password=$dbPassword")
     .option("driver", "org.postgresql.Driver")
     .option("query", "select * from messages")
-    .option("fetchsize", "50")
+    .option("fetchsize", 500)
+    .option("numPartitions", 10)
     .load()
 
   dataDF.printSchema()
 
   dataDF.write
     .partitionBy("language")
-    .format("parquet")
+    .format("delta")
+    .option("checkpointLocation", "/tmp/checkpoint")
     .save(exportPath)
 
   waitForEnter
-  close()
+  close(session)
 }

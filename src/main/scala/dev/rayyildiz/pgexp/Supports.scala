@@ -1,11 +1,10 @@
 package dev.rayyildiz.pgexp
 
-import java.time.LocalDate
+import java.time.Instant
 
 import org.apache.log4j.{LogManager, Logger}
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-import java.time.format.DateTimeFormatter
 
 import scala.io.StdIn
 
@@ -16,40 +15,52 @@ trait SparkSupport {
     .setAppName("pgexp")
     .setIfMissing("spark.master", "local[*]")
 
-  lazy val spark: SparkSession = SparkSession.builder
-    .config(conf)
-    .getOrCreate()
+  def spark(container: String = "", accountKey: String = ""): SparkSession = {
+
+    val builder = SparkSession.builder
+      .config(conf)
+      .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+      .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+
+    if (!container.isEmpty && !accountKey.isEmpty) {
+      builder.config(s"fs.azure.account.key.$container.blob.core.windows.net", accountKey)
+    }
+
+    val session = builder.getOrCreate()
+
+    session.sparkContext.hadoopConfiguration.set("fs.wasbs.impl", "org.apache.hadoop.fs.azure.NativeAzureFileSystem")
+    session
+  }
 
   def waitForEnter: String = {
     Console.println("To finish press [ENTER] key")
     StdIn.readLine()
   }
 
-  def close(): Unit = {
+  def close(session: SparkSession): Unit = {
     log.info("Stopping spark...")
-    spark.close()
+    session.close()
     log.info("Spark server stopped")
   }
 }
 
-
 trait DatabaseSupport {
-  def getEnv(key:String, defaultVal:String): String = {
+  def getEnv(key: String, defaultVal: String): String = {
     val value = System.getenv(key)
     if (null == value || value.isEmpty) {
       defaultVal
     } else value
   }
 
-  lazy val dbUrl:String  = getEnv("PG_DATABASE","localhost")
-  lazy val dbPort:Int = getEnv("PG_PORT","5432").toInt
-  lazy val dbUsername:String = getEnv("PG_USERNAME","postgres")
-  lazy val dbPassword:String= getEnv("PG_PASSWORD","123456")
-  lazy val dbName :String = getEnv("PG_DBNAME","postgres")
+  lazy val dbUrl: String         = getEnv("PG_DATABASE", "localhost")
+  lazy val dbPort: Int           = getEnv("PG_PORT", "5432").toInt
+  lazy val dbUsername: String    = getEnv("PG_USERNAME", "postgres")
+  lazy val dbPassword: String    = getEnv("PG_PASSWORD", "123456")
+  lazy val dbName: String        = getEnv("PG_DBNAME", "postgres")
+  lazy val azAccountName: String = getEnv("AZ_ACCOUNT_NAME", "")
+  lazy val azAccountKey: String  = getEnv("AZ_ACCOUNT_KEY", "")
 
+  private val moment: Long = Instant.now().toEpochMilli
 
-  private val formatter: DateTimeFormatter = DateTimeFormatter.BASIC_ISO_DATE
-  private val moment :String = formatter.format(LocalDate.now())
-
-  lazy val exportPath:String = getEnv("EXPORT_PATH",s"./export/${moment}")
+  lazy val exportPath: String = getEnv("EXPORT_PATH", s"/tmp/data/${moment}")
 }

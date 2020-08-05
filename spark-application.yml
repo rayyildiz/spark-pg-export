@@ -6,16 +6,16 @@ spec:
   type: Scala
   mode: cluster
   image: rayyildiz/pgexport
-  imagePullPolicy: Always
+  imagePullPolicy: IfNotPresent
   mainClass: dev.rayyildiz.pgexp.ExportData
   mainApplicationFile: "local:///opt/spark/work/pg-exporter.jar"
   sparkVersion: "3.0.0"
   restartPolicy:
     type: Never
   volumes:
-    - name: "data-volume"
+    - name: "tmp-volume"
       hostPath:
-        path: "/data"
+        path: "/tmp"
         type: Directory
   driver:
     cores: 1
@@ -25,8 +25,8 @@ spec:
       version: 3.0.0
     serviceAccount: spark
     volumeMounts:
-      - name: "data-volume"
-        mountPath: "/data"
+      - name: "tmp-volume"
+        mountPath: "/tmp"
     env:
       - name: PG_DATABASE
         value: "localhost"
@@ -39,16 +39,16 @@ spec:
       - name: PG_DBNAME
         value: "postgres"
       - name: EXPORT_PATH
-        value: "/data"
+        value: "/tmp"
   executor:
-    cores: 3
+    cores: 1
     instances: 1
     memory: "512m"
     labels:
       version: 3.0.0
     volumeMounts:
-      - name: "data-volume"
-        mountPath: "/data"
+      - name: "tmp-volume"
+        mountPath: "/tmp"
     env:
       - name: PG_DATABASE
         value: "localhost"
@@ -61,4 +61,4 @@ spec:
       - name: PG_DBNAME
         value: "postgres"
       - name: EXPORT_PATH
-        value: "/data"
+        value: "/tmp"
