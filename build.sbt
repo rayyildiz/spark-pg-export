@@ -13,10 +13,9 @@ javaOptions in run ++= Seq(
 val sparkVersion = "3.0.0"
 
 libraryDependencies ++= Seq(
-  "org.postgresql"      % "postgresql"      % "42.2.14",
-  "org.apache.hadoop"   % "hadoop-azure"    % "3.3.0",
-  "org.apache.hadoop"   % "hadoop-common"   % "3.3.0",
-  "io.delta"           %% "delta-core"      % "0.7.0",
-  "org.apache.spark"   %% "spark-streaming" % sparkVersion % Provided,
-  "org.apache.spark"   %% "spark-sql"       % sparkVersion % Provided
+  "org.postgresql"    % "postgresql"    % "42.2.14",
+  "org.apache.hadoop" % "hadoop-azure"  % "3.2.0",
+  "org.apache.hadoop" % "hadoop-common" % "3.2.0"      % Provided ,
+  "io.delta"         %% "delta-core"    % "0.7.0",
+  "org.apache.spark" %% "spark-sql"     % sparkVersion % Provided
 )
