@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+    id 'scala'
+    id 'idea'
+    id "com.github.johnrengelman.shadow" version "6.0.0"
+}
+
+repositories {
+    jcenter()
+    mavenLocal()
+    mavenCentral()
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+
+configurations {
+    provided
+}
+
+sourceSets {
+    main {
+        compileClasspath += configurations.provided
+    }
+}
+
+
+dependencies {
+    implementation 'org.scala-lang:scala-library:2.12.12'
+    implementation 'org.postgresql:postgresql:42.2.14'
+    implementation 'io.delta:delta-core_2.12:0.7.0'
+    compileOnly 'org.apache.hadoop:hadoop-common:3.2.0'
+    compileOnly 'org.apache.spark:spark-sql_2.12:3.0.0'
+
+    testImplementation 'org.scalatest:scalatest_2.12:3.2.0'
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': title,
+                'Implementation-Version': archiveVersion,
+                'Main-Class': mainClassFile
+    }
+    include{sourceSets.main.output}
+    zip64 true
+}
+
+shadowJar {
+    classifier = 'shadow'
+    append 'reference.conf'
+    dependencies {
+
+    }
+}
+
+task run(type: JavaExec, dependsOn: classes) {
+    main = mainClassFile
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.runtime
+}
+
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [ configurations.provided ]
+    }
+}
