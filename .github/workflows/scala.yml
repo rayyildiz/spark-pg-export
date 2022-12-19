@@ -14,10 +14,18 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Cache Primes
+      id: cache-primes
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.ivy2/cache
+          ~/.sbt
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+
     - uses: actions/setup-java@v2
       with:
         distribution: 'temurin'
         java-version: '11'
-        cache: 'sbt'
 
     - run: sbt compile package
