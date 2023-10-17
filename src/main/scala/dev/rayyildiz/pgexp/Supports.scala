@@ -11,8 +11,8 @@ import scala.io.StdIn
 trait SparkSupport {
   lazy val log: Logger = LogManager.getLogger(getClass)
 
-  lazy val conf: SparkConf = new SparkConf()
-    .setAppName("pgexp")
+  private lazy val conf: SparkConf = new SparkConf()
+    .setAppName("pg-exp")
     .setIfMissing("spark.master", "local[*]")
 
   def spark(container: String = "", accountKey: String = ""): SparkSession = {
@@ -45,7 +45,7 @@ trait SparkSupport {
 }
 
 trait DatabaseSupport {
-  def getEnv(key: String, defaultVal: String): String = {
+  private def getEnv(key: String, defaultVal: String): String = {
     val value = System.getenv(key)
     if (null == value || value.isEmpty) {
       defaultVal

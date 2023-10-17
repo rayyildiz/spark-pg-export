@@ -5,6 +5,8 @@ import org.apache.spark.sql.SparkSession
 object ExportData extends App with SparkSupport with DatabaseSupport {
   private val session: SparkSession = spark(azAccountName, azAccountKey)
 
+  log.info("starting spark")
+
   private val dataDF = session.read
     .format("jdbc")
     .option("url", s"jdbc:postgresql://$dbUrl:$dbPort/$dbName?user=$dbUsername&password=$dbPassword")

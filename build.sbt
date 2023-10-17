@@ -1,7 +1,7 @@
 name := "pg-exporter"
 
-ThisBuild / version := "0.2"
-ThisBuild / scalaVersion := "2.12.12"
+ThisBuild / version := "0.2.1"
+ThisBuild / scalaVersion := "2.12.17"
 
 Compile / run / fork := true
 Compile / run / javaOptions ++= Seq(
@@ -9,7 +9,7 @@ Compile / run / javaOptions ++= Seq(
   "-Dlog4j.configuration=log4j.properties"
 )
 
-val sparkVersion = "3.3.1"
+val sparkVersion = "3.5.0"
 
 libraryDependencies ++= Seq(
   "org.postgresql"    % "postgresql"    % "42.5.1",
